@@ -1,184 +1,205 @@
-import tkinter as tk
-from tkinter import messagebox
-from PIL import Image, ImageTk
+import numpy as np
+import matplotlib.pyplot as plt
+from tkinter import *
+from tkinter import messagebox, ttk
 
-# ---------------- Fungsi bikin rounded rectangle ----------------
-def create_rounded_rect(canvas, x1, y1, x2, y2, r=20, **kwargs):
-    points = [
-        x1+r, y1,
-        x2-r, y1,
-        x2, y1,
-        x2, y1+r,
-        x2, y2-r,
-        x2, y2,
-        x2-r, y2,
-        x1+r, y2,
-        x1, y2,
-        x1, y2-r,
-        x1, y1+r,
-        x1, y1
-    ]
-    return canvas.create_polygon(points, smooth=True, **kwargs)
+def keseluruhan_konversi(digits):
+    return format(int(digits), 'b')
+
+def gambar_encoding(binary, opsi):
+    Tb = 0.1       
+    N = 100        
+    total_time = len(binary) * Tb
+    t = np.linspace(0, total_time, len(binary) * N)
+    signal = np.zeros_like(t)
+
+    if opsi == 1: # Digital
+        for i, bit in enumerate(binary):
+            signal[i*N:(i+1)*N] = 1 if bit == '1' else 0
+        plt.step(t, signal, where="post")
+        plt.ylim(0.0, 1.05)
+        plt.title("Sinyal Digital")
+
+    elif opsi == 2: # Analog
+        f = 5
+        signal = np.sin(2*np.pi*f*t)
+        plt.plot(t, signal)
+        plt.title("Sinyal Analog")
+
+    elif opsi == 3: # AM
+        fc = 10
+        for i, bit in enumerate(binary):
+            tt = t[i*N:(i+1)*N]
+            if bit == '1':
+                signal[i*N:(i+1)*N] = np.sin(2*np.pi*fc*(tt - tt[0]))
+            else:
+                signal[i*N:(i+1)*N] = 0
+        plt.plot(t, signal)
+        plt.title("Amplitude Modulation (AM)")
+
+    elif opsi == 4: # FM
+        cycles_0, cycles_1 = 4, 1
+        for i, bit in enumerate(binary):
+            tt = np.linspace(0, 1, N, endpoint=False)
+            cycles = cycles_0 if bit == '0' else cycles_1
+            signal[i*N:(i+1)*N] = np.sin(2*np.pi*cycles*tt)
+        plt.plot(t, signal)
+        plt.title("Frequency Modulation (FM)")
+
+    elif opsi == 5: # PM
+        fc = 10
+        for i, bit in enumerate(binary):
+            phase = np.pi if bit == '1' else 0
+            tt = t[i*N:(i+1)*N]
+            signal[i*N:(i+1)*N] = np.sin(2*np.pi*fc*(tt-tt[0]) + phase)
+        plt.plot(t, signal)
+        plt.title("Phase Modulation (PM)")
+
+    elif opsi == 6:  # ASK
+        fc = 4
+        for i, bit in enumerate(binary):
+            tt = np.linspace(0, 1, N, endpoint=False)
+            if bit == '1':
+                signal[i*N:(i+1)*N] = np.sin(2*np.pi*fc*tt)
+            else:
+                signal[i*N:(i+1)*N] = 0
+        plt.plot(t, signal)
+        plt.title("Amplitude Shift Keying (ASK)")
+
+    elif opsi == 7:
+        f0, f1 = 4, 8
+        for i, bit in enumerate(binary):
+            tt = np.linspace(0, 1, N, endpoint=False)
+            freq = f1 if bit == '1' else f0
+            signal[i*N:(i+1)*N] = np.sin(2 * np.pi * freq * tt)
+        plt.plot(t, signal)
+        plt.title("Frequency Shift Keying (FSK)")
+
+    elif opsi == 8:  # PSK
+        fc = 4
+        for i, bit in enumerate(binary):
+            tt = np.linspace(0, 1, N, endpoint=False)
+            if bit == '1':
+                signal[i*N:(i+1)*N] = np.sin(2*np.pi*fc*tt + np.pi)
+            else:
+                signal[i*N:(i+1)*N] = np.sin(2*np.pi*fc*tt)
+        plt.plot(t, signal)
+        plt.title("Phase Shift Keying (PSK)")
+
+    elif opsi == 9:  # NRZ-L
+        for i, bit in enumerate(binary):
+            signal[i*N:(i+1)*N] = 1 - int(bit)
+        plt.step(t, signal, where="post")
+        plt.ylim(0.0, 1.05)
+        plt.title("NRZ-L")
+
+    elif opsi == 10: # NRZ-I
+        level = 0
+        for i, bit in enumerate(binary):
+            if bit == '1':
+                level = 1 - level
+            signal[i*N:(i+1)*N] = level
+        plt.step(t, signal, where="post")
+        plt.ylim(0.0, 1.05)
+        plt.title("NRZ-I")
+
+    elif opsi == 11: # RZ
+        for i, bit in enumerate(binary):
+            if bit == '1':
+                signal[i*N:i*N+N//2] = 1
+                signal[i*N+N//2:(i+1)*N] = 0
+            else:
+                signal[i*N:i*N+N//2] = -1
+                signal[i*N+N//2:(i+1)*N] = 0
+        plt.step(t, signal, where="post")
+        plt.ylim(-1.2, 1.2)
+        plt.title("Return to Zero (RZ)")
+
+    elif opsi == 12: #Manchester
+        for i, bit in enumerate(binary):
+            if bit == '1':
+                signal[i*N:i*N+N//2] = 0
+                signal[i*N+N//2:(i+1)*N] = 1
+            else:
+                signal[i*N:i*N+N//2] = 1
+                signal[i*N+N//2:(i+1)*N] = 0
+        plt.step(t, signal, where="post")
+        plt.ylim(0.0, 1.05)
+        plt.title("Manchester")
+
+    elif opsi == 13: # Differential Manchester
+        level = 1
+        for i, bit in enumerate(binary):
+            if bit == '0':
+                level = 1 - level
+            signal[i*N:i*N+N//2] = level
+            level = 1 - level
+            signal[i*N+N//2:(i+1)*N] = level
+        plt.step(t, signal, where="post")
+        plt.ylim(0.0, 1.05)
+        plt.title("Differential Manchester")
+
+    # === Sumbu & Layout ===
+    plt.xlabel("Waktu (detik)")
+    plt.ylabel("Amplitudo")
+    plt.xlim(0, total_time)
+    plt.grid(False)
+
+    ax = plt.gca()
+    for spine in ax.spines.values():
+        spine.set_visible(True)
+
+    plt.axhline(0, color="black", linewidth=0.8) 
+    plt.axvline(0, color="black", linewidth=0.8)  
+
+    plt.show()
+
+def generate_signal():
+    digits = entry_digit.get()
+    if not digits.isdigit():
+        messagebox.showerror("Error", "Input harus angka")
+        return
+
+    binary = keseluruhan_konversi(digits)
+    opsi = combo_box.current() + 1
+    label_info.config(text=f"Biner: {binary}\nSkema: {combo_box.get()}")
+    gambar_encoding(binary, opsi)
 
 
-# ---------------- Halaman Welcome ----------------
-class WelcomePage:
-    def __init__(self, root):
-        self.root = root
-        self.root.title("Welcome Page")
-        self.root.geometry("600x500")
-        self.root.resizable(False, False)
+root = Tk()
+root.title("Digital Modulation Simulator")
+root.state("zoomed")
+root.config(bg="#f8f8f8")
 
-        self.canvas = tk.Canvas(self.root, highlightthickness=0)
-        self.canvas.pack(fill="both", expand=True)
+main_frame = Frame(root, bg="#f8f8f8")
+main_frame.place(relx=0.5, rely=0.5, anchor="center")
+Label(main_frame, text="Digital Modulation Simulator",
+      font=("Arial", 24, "bold"), bg="#f8f8f8").pack(pady=20)
 
-        self.original_image = Image.open("asset/Background_.png")
-        self.bg_photo = None
-
-        self.resize_job = None
-        self.update_background()
-        self.root.bind("<Configure>", self.on_resize)
-
-    def on_resize(self, event):
-        if self.resize_job:
-            self.root.after_cancel(self.resize_job)
-        # delay 200ms supaya tidak redraw terus
-        self.resize_job = self.root.after(200, self.update_background)
-
-    def update_background(self):
-        w, h = self.root.winfo_width(), self.root.winfo_height()
-        if w > 1 and h > 1:
-            resized = self.original_image.resize((w, h), Image.LANCZOS)
-            self.bg_photo = ImageTk.PhotoImage(resized)
-
-            self.canvas.delete("all")
-            self.canvas.create_image(0, 0, image=self.bg_photo, anchor="nw")
-
-            box_w, box_h = 320, 80
-            x_box, y_box = w * 0.6, h * 0.3
-            create_rounded_rect(
-                self.canvas,
-                x_box - box_w//2, y_box - box_h//2,
-                x_box + box_w//2, y_box + box_h//2,
-                r=20, fill="#e6e6e6", outline=""
-            )
-            self.canvas.create_text(x_box, y_box,
-                                    text="Konversi Signal Encoding",
-                                    font=("Helvetica", 16, "bold"),
-                                    fill="black")
-
-            create_button = tk.Button(self.root, text="create",
-                                      font=("Helvetica", 12, "bold"),
-                                      bg="#4e2c1e", fg="white",
-                                      width=10, command=self.next_page,
-                                      relief="flat", bd=0)
-            self.canvas.create_window(x_box, y_box + 80, window=create_button)
-
-            about_button = tk.Button(self.root, text="About Us",
-                                     font=("Helvetica", 12, "bold"),
-                                     bg="#fbc97f", fg="black",
-                                     width=10, command=self.about_page,
-                                     relief="flat", bd=0)
-            self.canvas.create_window(w - 100, h - 50, window=about_button)
-
-    def next_page(self):
-        self.canvas.destroy()
-        KonversiPage(self.root)
-
-    def about_page(self):
-        messagebox.showinfo("About Us", "Aplikasi Konversi Sinyal Encoding\nDibuat dengan Tkinter")
+frame_input = Frame(main_frame, bg="#f8f8f8")
+frame_input.pack(pady=10)
+Label(frame_input, text="Masukkan Angka:", font=("Arial", 12), bg="#f8f8f8").pack(side=LEFT, padx=8)
+entry_digit = Entry(frame_input, width=20, font=("Arial", 14))
+entry_digit.pack(side=LEFT)
 
 
-# ---------------- Halaman Input 5 Digit ----------------
-import tkinter as tk
-from tkinter import messagebox
-from PIL import Image, ImageTk
+options = [
+    'Sinyal Digital', 'Sinyal Analog', 'AM', 'FM', 'PM',
+    'ASK', 'FSK', 'PSK', 'NRZ-L', 'NRZ-I', 'RZ',
+    'Manchester', 'Differential Manchester'
+]
+frame_combo = Frame(main_frame, bg="#f8f8f8")
+frame_combo.pack(pady=15)
+Label(frame_combo, text="Pilih Skema:", font=("Arial", 12), bg="#f8f8f8").pack(side=LEFT, padx=8)
+combo_box = ttk.Combobox(frame_combo, values=options, state="readonly", width=28, font=("Arial", 12))
+combo_box.pack(side=LEFT)
+combo_box.current(0)
 
-class KonversiPage:
-    def __init__(self, root):
-        self.root = root
-        self.canvas = tk.Canvas(self.root, highlightthickness=0)
-        self.canvas.pack(fill="both", expand=True)
+Button(main_frame, text="Generate Signal", command=generate_signal,
+       bg="#4CAF50", fg="white", font=("Arial", 12, "bold"),
+       width=22, height=2).pack(pady=25)
 
-        self.original_image = Image.open("asset/tampilan.png")
-        self.bg_photo = None
+label_info = Label(main_frame, text="", font=("Arial", 11), bg="#f8f8f8")
+label_info.pack()
 
-        self.resize_job = None
-        self.update_background()
-        self.root.bind("<Configure>", self.on_resize)
-
-    def on_resize(self, event):
-        if self.resize_job:
-            self.root.after_cancel(self.resize_job)
-        self.resize_job = self.root.after(200, self.update_background)
-
-    def update_background(self):
-        w, h = self.root.winfo_width(), self.root.winfo_height()
-        if w > 1 and h > 1:
-            resized = self.original_image.resize((w, h), Image.LANCZOS)
-            self.bg_photo = ImageTk.PhotoImage(resized)
-
-            self.canvas.delete("all")
-            self.canvas.create_image(0, 0, image=self.bg_photo, anchor="nw")
-
-            # --- Kotak semi transparan di tengah ---
-            box_w, box_h = 350, 220
-            x_box, y_box = w // 2, h // 2
-            self.canvas.create_rectangle(
-                x_box - box_w//2, y_box - box_h//2,
-                x_box + box_w//2, y_box + box_h//2,
-                fill="#f9f9f9", outline="#cccccc", width=2
-            )
-
-            # --- Label judul ---
-            label = tk.Label(
-                self.root, text="Masukkan 5 Digit Angka",
-                font=("Helvetica", 14, "bold"),
-                bg="#f9f9f9", fg="#333333"
-            )
-            self.canvas.create_window(x_box, y_box - 60, window=label)
-
-            # --- Input field ---
-            self.entry = tk.Entry(
-                self.root, font=("Helvetica", 14),
-                justify="center", bg="#ffffff", fg="#000000",
-                relief="solid", bd=1
-            )
-            self.canvas.create_window(x_box, y_box - 20, window=self.entry, width=200, height=35)
-
-            # --- Tombol Generate ---
-            generate_btn = tk.Button(
-                self.root, text="Generate",
-                font=("Helvetica", 12, "bold"),
-                bg="#4e2c1e", fg="white",
-                relief="flat", padx=10, pady=5,
-                command=self.check_input
-            )
-            self.canvas.create_window(x_box, y_box + 30, window=generate_btn, width=120, height=35)
-
-            # --- Tombol Back ---
-            back_btn = tk.Button(
-                self.root, text="Back",
-                font=("Helvetica", 12, "bold"),
-                bg="#fbc97f", fg="black",
-                relief="flat", padx=10, pady=5,
-                command=self.back_to_welcome
-            )
-            self.canvas.create_window(x_box, y_box + 80, window=back_btn, width=120, height=35)
-
-    def check_input(self):
-        value = self.entry.get().strip()
-        if value.isdigit() and len(value) == 5:
-            messagebox.showinfo("Sukses", f"Input valid: {value}")
-        else:
-            messagebox.showerror("Error", "Harus 5 Digit")
-
-    def back_to_welcome(self):
-        self.canvas.destroy()
-        WelcomePage(self.root)  # pastikan WelcomePage sudah didefinisikan
-
-# ---------------- Main ----------------
-if __name__ == "__main__":
-    root = tk.Tk()
-    app = WelcomePage(root)
-    root.mainloop()
+root.mainloop()
