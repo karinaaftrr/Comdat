@@ -140,7 +140,7 @@ def gambar_encoding(binary, opsi):
     plt.xlabel("Waktu (detik)")
     plt.ylabel("Amplitudo")
     plt.xlim(0, total_time)
-    plt.grid(True)
+    plt.grid(False)
     plt.show()
 
 def generate_signal():
@@ -188,3 +188,4 @@ label_info = Label(root, text="", font=("Arial", 10), bg="#f8f8f8")
 label_info.pack()
 
 root.mainloop()
+
