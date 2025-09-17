@@ -7,7 +7,7 @@ def keseluruhan_konversi(digits):
     return format(int(digits), 'b')
 
 def gambar_encoding(binary, opsi):
-    Tb = 0.1       
+    Tb = 0.5      
     N = 100        
     total_time = len(binary) * Tb
     t = np.linspace(0, total_time, len(binary) * N)
@@ -203,3 +203,4 @@ label_info = Label(main_frame, text="", font=("Arial", 11), bg="#f8f8f8")
 label_info.pack()
 
 root.mainloop()
+
