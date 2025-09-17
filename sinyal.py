@@ -6,7 +6,7 @@ from tkinter import messagebox, ttk
 def keseluruhan_konversi(digits):
     return format(int(digits), 'b')
 
-def gambar_encoding(binary, opsi):
+def gambar_encoding(binary, opsi, ax):
     Tb = 0.5      
     N = 100        
     total_time = len(binary) * Tb
@@ -16,15 +16,15 @@ def gambar_encoding(binary, opsi):
     if opsi == 1: # Digital
         for i, bit in enumerate(binary):
             signal[i*N:(i+1)*N] = 1 if bit == '1' else 0
-        plt.step(t, signal, where="post")
-        plt.ylim(0.0, 1.05)
-        plt.title("Sinyal Digital")
+        ax.step(t, signal, where="post")
+        ax.set_ylim(0.0, 1.05)
+        ax.set_title("Sinyal Digital")
 
     elif opsi == 2: # Analog
         f = 5
         signal = np.sin(2*np.pi*f*t)
-        plt.plot(t, signal)
-        plt.title("Sinyal Analog")
+        ax.plot(t, signal)
+        ax.set_title("Sinyal Analog")
 
     elif opsi == 3: # AM
         fc = 10
@@ -34,8 +34,8 @@ def gambar_encoding(binary, opsi):
                 signal[i*N:(i+1)*N] = np.sin(2*np.pi*fc*(tt - tt[0]))
             else:
                 signal[i*N:(i+1)*N] = 0
-        plt.plot(t, signal)
-        plt.title("Amplitude Modulation (AM)")
+        ax.plot(t, signal)
+        ax.set_title("Amplitude Modulation (AM)")
 
     elif opsi == 4: # FM
         cycles_0, cycles_1 = 4, 1
@@ -43,8 +43,8 @@ def gambar_encoding(binary, opsi):
             tt = np.linspace(0, 1, N, endpoint=False)
             cycles = cycles_0 if bit == '0' else cycles_1
             signal[i*N:(i+1)*N] = np.sin(2*np.pi*cycles*tt)
-        plt.plot(t, signal)
-        plt.title("Frequency Modulation (FM)")
+        ax.plot(t, signal)
+        ax.set_title("Frequency Modulation (FM)")
 
     elif opsi == 5: # PM
         fc = 10
@@ -52,8 +52,8 @@ def gambar_encoding(binary, opsi):
             phase = np.pi if bit == '1' else 0
             tt = t[i*N:(i+1)*N]
             signal[i*N:(i+1)*N] = np.sin(2*np.pi*fc*(tt-tt[0]) + phase)
-        plt.plot(t, signal)
-        plt.title("Phase Modulation (PM)")
+        ax.plot(t, signal)
+        ax.set_title("Phase Modulation (PM)")
 
     elif opsi == 6:  # ASK
         fc = 4
@@ -63,8 +63,8 @@ def gambar_encoding(binary, opsi):
                 signal[i*N:(i+1)*N] = np.sin(2*np.pi*fc*tt)
             else:
                 signal[i*N:(i+1)*N] = 0
-        plt.plot(t, signal)
-        plt.title("Amplitude Shift Keying (ASK)")
+        ax.plot(t, signal)
+        ax.set_title("Amplitude Shift Keying (ASK)")
 
     elif opsi == 7:
         f0, f1 = 4, 8
@@ -72,8 +72,8 @@ def gambar_encoding(binary, opsi):
             tt = np.linspace(0, 1, N, endpoint=False)
             freq = f1 if bit == '1' else f0
             signal[i*N:(i+1)*N] = np.sin(2 * np.pi * freq * tt)
-        plt.plot(t, signal)
-        plt.title("Frequency Shift Keying (FSK)")
+        ax.plot(t, signal)
+        ax.set_title("Frequency Shift Keying (FSK)")
 
     elif opsi == 8:  # PSK
         fc = 4
@@ -83,15 +83,15 @@ def gambar_encoding(binary, opsi):
                 signal[i*N:(i+1)*N] = np.sin(2*np.pi*fc*tt + np.pi)
             else:
                 signal[i*N:(i+1)*N] = np.sin(2*np.pi*fc*tt)
-        plt.plot(t, signal)
-        plt.title("Phase Shift Keying (PSK)")
+        ax.plot(t, signal)
+        ax.set_title("Phase Shift Keying (PSK)")
 
     elif opsi == 9:  # NRZ-L
         for i, bit in enumerate(binary):
             signal[i*N:(i+1)*N] = 1 - int(bit)
-        plt.step(t, signal, where="post")
-        plt.ylim(0.0, 1.05)
-        plt.title("NRZ-L")
+        ax.step(t, signal, where="post")
+        ax.set_ylim(0.0, 1.05)
+        ax.set_title("NRZ-L")
 
     elif opsi == 10: # NRZ-I
         level = 0
@@ -99,9 +99,9 @@ def gambar_encoding(binary, opsi):
             if bit == '1':
                 level = 1 - level
             signal[i*N:(i+1)*N] = level
-        plt.step(t, signal, where="post")
-        plt.ylim(0.0, 1.05)
-        plt.title("NRZ-I")
+        ax.step(t, signal, where="post")
+        ax.set_ylim(0.0, 1.05)
+        ax.set_title("NRZ-I")
 
     elif opsi == 11: # RZ
         for i, bit in enumerate(binary):
@@ -111,9 +111,9 @@ def gambar_encoding(binary, opsi):
             else:
                 signal[i*N:i*N+N//2] = -1
                 signal[i*N+N//2:(i+1)*N] = 0
-        plt.step(t, signal, where="post")
-        plt.ylim(-1.2, 1.2)
-        plt.title("Return to Zero (RZ)")
+        ax.step(t, signal, where="post")
+        ax.set_ylim(-1.2, 1.2)
+        ax.set_title("Return to Zero (RZ)")
 
     elif opsi == 12: #Manchester
         for i, bit in enumerate(binary):
@@ -123,9 +123,9 @@ def gambar_encoding(binary, opsi):
             else:
                 signal[i*N:i*N+N//2] = 1
                 signal[i*N+N//2:(i+1)*N] = 0
-        plt.step(t, signal, where="post")
-        plt.ylim(0.0, 1.05)
-        plt.title("Manchester")
+        ax.step(t, signal, where="post")
+        ax.set_ylim(0.0, 1.05)
+        ax.set_title("Manchester")
 
     elif opsi == 13: # Differential Manchester
         level = 1
@@ -135,24 +135,18 @@ def gambar_encoding(binary, opsi):
             signal[i*N:i*N+N//2] = level
             level = 1 - level
             signal[i*N+N//2:(i+1)*N] = level
-        plt.step(t, signal, where="post")
-        plt.ylim(0.0, 1.05)
-        plt.title("Differential Manchester")
+        ax.step(t, signal, where="post")
+        ax.set_ylim(0.0, 1.05)
+        ax.set_title("Differential Manchester")
 
     # === Sumbu & Layout ===
-    plt.xlabel("Waktu (detik)")
-    plt.ylabel("Amplitudo")
-    plt.xlim(0, total_time)
-    plt.grid(False)
+    ax.set_xlabel("Waktu (detik)")
+    ax.set_ylabel("Amplitudo")
+    ax.set_xlim(0, total_time)
+    ax.grid(False)
 
-    ax = plt.gca()
-    for spine in ax.spines.values():
-        spine.set_visible(True)
-
-    plt.axhline(0, color="black", linewidth=0.8) 
-    plt.axvline(0, color="black", linewidth=0.8)  
-
-    plt.show()
+    ax.axhline(0, color="black", linewidth=0.8) 
+    ax.axvline(0, color="black", linewidth=0.8)  
 
 def generate_signal():
     digits = entry_digit.get()
@@ -161,46 +155,62 @@ def generate_signal():
         return
 
     binary = keseluruhan_konversi(digits)
-    opsi = combo_box.current() + 1
-    label_info.config(text=f"Biner: {binary}\nSkema: {combo_box.get()}")
-    gambar_encoding(binary, opsi)
+    selected_indices = listbox.curselection()
 
+    if not selected_indices:
+        messagebox.showerror("Error", "Pilih minimal satu skema!")
+        return
 
+    fig, axes = plt.subplots(len(selected_indices), 1, figsize=(10, 3*len(selected_indices)))
+    if len(selected_indices) == 1:
+        axes = [axes]  # supaya iterable
+
+    for ax, idx in zip(axes, selected_indices):
+        opsi = idx + 1
+        gambar_encoding(binary, opsi, ax)
+
+    plt.tight_layout(pad=3.0)
+    plt.subplots_adjust(hspace=0.6)
+    plt.show()
+
+# ================== GUI ==================
 root = Tk()
-root.title("Digital Modulation Simulator")
+root.title("Hi, I'm your digital modulation simulator!")
 root.state("zoomed")
-root.config(bg="#f8f8f8")
+root.config(bg="#EBD6FB")
 
-main_frame = Frame(root, bg="#f8f8f8")
+main_frame = Frame(root, bg="#EBD6FB")
 main_frame.place(relx=0.5, rely=0.5, anchor="center")
-Label(main_frame, text="Digital Modulation Simulator",
-      font=("Arial", 24, "bold"), bg="#f8f8f8").pack(pady=20)
+Label(main_frame, text="⋆˚꩜｡ Hi, I'm your digital modulation simulator! ⋆˚꩜｡",
+      font=("Helvetica", 24, "bold"), bg="#EBD6FB").pack(pady=20)
 
-frame_input = Frame(main_frame, bg="#f8f8f8")
+frame_input = Frame(main_frame, bg="#EBD6FB")
 frame_input.pack(pady=10)
-Label(frame_input, text="Masukkan Angka:", font=("Arial", 12), bg="#f8f8f8").pack(side=LEFT, padx=8)
-entry_digit = Entry(frame_input, width=20, font=("Arial", 14))
+Label(frame_input, text="Input your decimal :", font=("System", 14), bg="#EBD6FB").pack(side=LEFT, padx=8)
+entry_digit = Entry(frame_input, width=20, font=("System", 14))
 entry_digit.pack(side=LEFT)
 
-
 options = [
-    'Sinyal Digital', 'Sinyal Analog', 'AM', 'FM', 'PM',
-    'ASK', 'FSK', 'PSK', 'NRZ-L', 'NRZ-I', 'RZ',
-    'Manchester', 'Differential Manchester'
+    ' Digital Signal', ' Analog Signal', ' AM', ' FM', ' PM',
+    ' ASK', ' FSK', ' PSK', ' NRZ-L', ' NRZ-I', ' RZ',
+    ' Manchester', ' Differential Manchester'
 ]
-frame_combo = Frame(main_frame, bg="#f8f8f8")
-frame_combo.pack(pady=15)
-Label(frame_combo, text="Pilih Skema:", font=("Arial", 12), bg="#f8f8f8").pack(side=LEFT, padx=8)
-combo_box = ttk.Combobox(frame_combo, values=options, state="readonly", width=28, font=("Arial", 12))
-combo_box.pack(side=LEFT)
-combo_box.current(0)
+
+frame_listbox = Frame(main_frame, bg="#898AC4")
+frame_listbox.pack(pady=15)
+Label(frame_listbox, text="Choose your signals!",
+      font=("Helvetica", 12, "bold"), bg="#898AC4").pack()
+listbox = Listbox(frame_listbox, selectmode=MULTIPLE,
+                  height=5, width=50, font=("System", 12))
+listbox.pack()
+for opt in options:
+    listbox.insert(END, opt)
 
 Button(main_frame, text="Generate Signal", command=generate_signal,
-       bg="#4CAF50", fg="white", font=("Arial", 12, "bold"),
+       bg="#898AC4", fg="white", font=("System", 16, "bold"),
        width=22, height=2).pack(pady=25)
 
-label_info = Label(main_frame, text="", font=("Arial", 11), bg="#f8f8f8")
+label_info = Label(main_frame, text="", font=("Helvetica", 12, "bold"), bg="#EBD6FB")
 label_info.pack()
 
 root.mainloop()
-
