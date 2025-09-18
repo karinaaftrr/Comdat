@@ -19,13 +19,13 @@ def gambar_encoding(binary, opsi, ax):
             signal[i*N:(i+1)*N] = 1 if bit == '1' else 0
         ax.step(t, signal, where="post")
         ax.set_ylim(0.0, 1.05)
-        ax.set_title("Sinyal Digital")
+        ax.set_title("Digital Signal")
 
     elif opsi == 2: # Analog
         f = 5
         signal = np.sin(2*np.pi*f*t)
         ax.plot(t, signal)
-        ax.set_title("Sinyal Analog")
+        ax.set_title("Analog Signal")
 
     elif opsi == 3: # AM
         fc = 10
@@ -150,7 +150,7 @@ def gambar_encoding(binary, opsi, ax):
 def generate_signal():
     digits = entry_digit.get()
     if not digits.isdigit():
-        messagebox.showerror("Error", "Input harus angka")
+        messagebox.showerror("Error", "Input harus angka / Kamu belum memasukkan input")
         return
 
     binary = keseluruhan_konversi(digits)
@@ -160,7 +160,7 @@ def generate_signal():
         return
 
     # Buat figure
-    fig, axes = plt.subplots(len(selected_indices), 1, figsize=(10, 3*len(selected_indices)))
+    fig, axes = plt.subplots(len(selected_indices), 1, figsize=(13.5, 3*len(selected_indices)))
     if len(selected_indices) == 1:
         axes = [axes]
 
@@ -171,9 +171,10 @@ def generate_signal():
     plt.tight_layout(pad=3.0)
     plt.subplots_adjust(hspace=1.2)
 
-    # ==== Window baru dengan scrollbar ====
+    # ==== Scrollbar ====
     top = Toplevel(root)
     top.title("Generated Signals")
+    top.geometry("960x400")
 
     frame_canvas = Frame(top)
     frame_canvas.pack(fill=BOTH, expand=True)
