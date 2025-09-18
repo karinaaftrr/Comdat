@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from tkinter import *
 from tkinter import messagebox, ttk
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 def keseluruhan_konversi(digits):
     return format(int(digits), 'b')
@@ -66,7 +67,7 @@ def gambar_encoding(binary, opsi, ax):
         ax.plot(t, signal)
         ax.set_title("Amplitude Shift Keying (ASK)")
 
-    elif opsi == 7:
+    elif opsi == 7:  # FSK
         f0, f1 = 4, 8
         for i, bit in enumerate(binary):
             tt = np.linspace(0, 1, N, endpoint=False)
@@ -115,7 +116,7 @@ def gambar_encoding(binary, opsi, ax):
         ax.set_ylim(-1.2, 1.2)
         ax.set_title("Return to Zero (RZ)")
 
-    elif opsi == 12: #Manchester
+    elif opsi == 12: # Manchester
         for i, bit in enumerate(binary):
             if bit == '1':
                 signal[i*N:i*N+N//2] = 0
@@ -139,14 +140,12 @@ def gambar_encoding(binary, opsi, ax):
         ax.set_ylim(0.0, 1.05)
         ax.set_title("Differential Manchester")
 
-    # === Sumbu & Layout ===
+    # Sumbu
     ax.set_xlabel("Waktu (detik)")
     ax.set_ylabel("Amplitudo")
     ax.set_xlim(0, total_time)
-    ax.grid(False)
-
-    ax.axhline(0, color="black", linewidth=0.8) 
-    ax.axvline(0, color="black", linewidth=0.8)  
+    ax.axhline(0, color="purple", linewidth=0.8) 
+    ax.axvline(0, color="purple", linewidth=0.8)  
 
 def generate_signal():
     digits = entry_digit.get()
@@ -156,22 +155,45 @@ def generate_signal():
 
     binary = keseluruhan_konversi(digits)
     selected_indices = listbox.curselection()
-
     if not selected_indices:
         messagebox.showerror("Error", "Pilih minimal satu skema!")
         return
 
+    # Buat figure
     fig, axes = plt.subplots(len(selected_indices), 1, figsize=(10, 3*len(selected_indices)))
     if len(selected_indices) == 1:
-        axes = [axes]  # supaya iterable
+        axes = [axes]
 
     for ax, idx in zip(axes, selected_indices):
         opsi = idx + 1
         gambar_encoding(binary, opsi, ax)
 
     plt.tight_layout(pad=3.0)
-    plt.subplots_adjust(hspace=0.6)
-    plt.show()
+    plt.subplots_adjust(hspace=1.2)
+
+    # ==== Window baru dengan scrollbar ====
+    top = Toplevel(root)
+    top.title("Generated Signals")
+
+    frame_canvas = Frame(top)
+    frame_canvas.pack(fill=BOTH, expand=True)
+
+    canvas = Canvas(frame_canvas)
+    scrollbar = Scrollbar(frame_canvas, orient=VERTICAL, command=canvas.yview)
+    canvas.configure(yscrollcommand=scrollbar.set)
+
+    scrollbar.pack(side=RIGHT, fill=Y)
+    canvas.pack(side=LEFT, fill=BOTH, expand=True)
+
+    scrollable_frame = Frame(canvas)
+    canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+
+    def update_scrollregion(event):
+        canvas.configure(scrollregion=canvas.bbox("all"))
+    scrollable_frame.bind("<Configure>", update_scrollregion)
+
+    fig_canvas = FigureCanvasTkAgg(fig, scrollable_frame)
+    fig_canvas.get_tk_widget().pack(fill=BOTH, expand=True)
 
 # ================== GUI ==================
 root = Tk()
