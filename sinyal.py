@@ -19,13 +19,13 @@ def gambar_encoding(binary, opsi, ax):
             signal[i*N:(i+1)*N] = 1 if bit == '1' else 0
         ax.step(t, signal, where="post")
         ax.set_ylim(0.0, 1.05)
-        ax.set_title("Digital Signal")
+        ax.set_title("Sinyal Digital")
 
     elif opsi == 2: # Analog
         f = 5
         signal = np.sin(2*np.pi*f*t)
         ax.plot(t, signal)
-        ax.set_title("Analog Signal")
+        ax.set_title("Sinyal Analog")
 
     elif opsi == 3: # AM
         fc = 10
@@ -47,14 +47,29 @@ def gambar_encoding(binary, opsi, ax):
         ax.plot(t, signal)
         ax.set_title("Frequency Modulation (FM)")
 
-    elif opsi == 5: # PM
-        fc = 10
+    elif opsi == 5:  # Phase Modulation (PM)
+        total_time = len(binary) * Tb
+        t = np.linspace(0, total_time, len(binary) * N)
+        signal = np.zeros_like(t)
+
+        fc = 1 / Tb  
+        phase = 0     
+
         for i, bit in enumerate(binary):
-            phase = np.pi if bit == '1' else 0
             tt = t[i*N:(i+1)*N]
-            signal[i*N:(i+1)*N] = np.sin(2*np.pi*fc*(tt-tt[0]) + phase)
+            if i > 0 and binary[i] != binary[i-1]:
+                phase += np.pi   
+
+            signal[i*N:(i+1)*N] = np.sin(2*np.pi*fc*(tt - i*Tb) + phase + np.pi)
+
+
         ax.plot(t, signal)
-        ax.set_title("Phase Modulation (PM)")
+        ax.axhline(0, color='m', linewidth=1)
+        ax.set_ylim(-1.2, 1.2)
+        ax.set_title("Phase Modulation")
+        ax.set_xlabel("Waktu (detik)")
+        ax.set_ylabel("Amplitudo")
+        ax.grid(False)
 
     elif opsi == 6:  # ASK
         fc = 4
@@ -140,7 +155,6 @@ def gambar_encoding(binary, opsi, ax):
         ax.set_ylim(0.0, 1.05)
         ax.set_title("Differential Manchester")
 
-    # Sumbu
     ax.set_xlabel("Waktu (detik)")
     ax.set_ylabel("Amplitudo")
     ax.set_xlim(0, total_time)
@@ -150,7 +164,7 @@ def gambar_encoding(binary, opsi, ax):
 def generate_signal():
     digits = entry_digit.get()
     if not digits.isdigit():
-        messagebox.showerror("Error", "Input harus angka / Kamu belum memasukkan input")
+        messagebox.showerror("Error", "Input harus angka")
         return
 
     binary = keseluruhan_konversi(digits)
@@ -159,8 +173,7 @@ def generate_signal():
         messagebox.showerror("Error", "Pilih minimal satu skema!")
         return
 
-    # Buat figure
-    fig, axes = plt.subplots(len(selected_indices), 1, figsize=(13.5, 3*len(selected_indices)))
+    fig, axes = plt.subplots(len(selected_indices), 1, figsize=(13.3, 3*len(selected_indices)))
     if len(selected_indices) == 1:
         axes = [axes]
 
@@ -171,10 +184,9 @@ def generate_signal():
     plt.tight_layout(pad=3.0)
     plt.subplots_adjust(hspace=1.2)
 
-    # ==== Scrollbar ====
     top = Toplevel(root)
     top.title("Generated Signals")
-    top.geometry("960x400")
+    top.geometry("960x400") 
 
     frame_canvas = Frame(top)
     frame_canvas.pack(fill=BOTH, expand=True)
@@ -196,15 +208,14 @@ def generate_signal():
     fig_canvas = FigureCanvasTkAgg(fig, scrollable_frame)
     fig_canvas.get_tk_widget().pack(fill=BOTH, expand=True)
 
-# ================== GUI ==================
 root = Tk()
-root.title("Hi, I'm your digital modulation simulator!")
+root.title("Convert Signal Simulator")
 root.state("zoomed")
 root.config(bg="#EBD6FB")
 
 main_frame = Frame(root, bg="#EBD6FB")
 main_frame.place(relx=0.5, rely=0.5, anchor="center")
-Label(main_frame, text="⋆˚꩜｡ Hi, I'm your digital modulation simulator! ⋆˚꩜｡",
+Label(main_frame, text="Hi, I'm your Convert Signal Simulator",
       font=("Helvetica", 24, "bold"), bg="#EBD6FB").pack(pady=20)
 
 frame_input = Frame(main_frame, bg="#EBD6FB")
@@ -235,5 +246,13 @@ Button(main_frame, text="Generate Signal", command=generate_signal,
 
 label_info = Label(main_frame, text="", font=("Helvetica", 12, "bold"), bg="#EBD6FB")
 label_info.pack()
+
+# ==== Credit Names ====
+frame_credit = Frame(main_frame, bg="#EBD6FB")
+frame_credit.pack(pady=10)
+
+Label(frame_credit, text="Rama Praditha R (2417051039)", font=("Helvetica", 10, "bold"), bg="#EBD6FB").pack(side=LEFT, padx=10)
+Label(frame_credit, text="Karina Fitriamalia (2417051014)", font=("Helvetica", 10, "bold"), bg="#EBD6FB").pack(side=LEFT, padx=10)
+Label(frame_credit, text="Indriyani Talitha P (2417051013)", font=("Helvetica", 10, "bold"), bg="#EBD6FB").pack(side=LEFT, padx=10)
 
 root.mainloop()
